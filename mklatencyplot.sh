@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# 1. Run cyclictest
-cyclictest -l100000000 -m -Sp90 -i200 -h400 -q >output 
+cyclictest_output=$1
 
 # 2. Get maximum latency
-max=`grep "Max Latencies" output | tr " " "\n" | sort -n | tail -1 | sed s/^0*//`
+max=`grep "Max Latencies" ${cyclictest_output} | tr " " "\n" | sort -n | tail -1 | sed s/^0*//`
 
 # 3. Grep data lines, remove empty lines and create a common field separator
-grep -v -e "^#" -e "^$" output | tr " " "\t" >histogram 
+grep -v -e "^#" -e "^$" ${cyclictest_output} | tr " " "\t" >histogram 
 
 # 4. Set the number of cores, for example
 cores=4
@@ -27,7 +26,7 @@ set logscale y\n\
 set xrange [0:400]\n\
 set yrange [0.8:*]\n\
 set ylabel \"Number of latency samples\"\n\
-set output \"plot.png\"\n\
+set output \"plot.png\"
 plot " >plotcmd
 
 # 7. Append plot command data references
