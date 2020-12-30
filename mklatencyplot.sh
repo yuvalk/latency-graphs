@@ -2,6 +2,9 @@
 
 cyclictest_output=$1
 
+workdir=${workdir:-work}
+pushd $workdir
+
 # 2. Get maximum latency
 max=`grep "Max Latencies" ${cyclictest_output} | tr " " "\n" | sort -n | tail -1 | sed s/^0*//`
 
@@ -49,3 +52,4 @@ done
 # 8. Execute plot command
 gnuplot -persist <plotcmd
 
+popd
