@@ -15,7 +15,7 @@ cyclictest_output=$1
 
 workdir=${workdir:-work}
 cp ${cyclictest_output} ${workdir}/data.dat
-pushd $workdir
+pushd $workdir > /dev/null
 cyclictest_output=data.dat
 
 # 2. Get maximum latency
@@ -65,4 +65,4 @@ done
 # 8. Execute plot command
 gnuplot -persist <plotcmd
 
-popd
+popd > /dev/null
