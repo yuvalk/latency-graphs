@@ -12,7 +12,7 @@ max=`grep "Max Latencies" ${cyclictest_output} | tr " " "\n" | sort -n | tail -1
 grep -v -e "^#" -e "^$" ${cyclictest_output} | tr " " "\t" >histogram 
 
 # 4. Set the number of cores, for example
-cores=4
+cores=`tail -1 histogram | awk '{print NF - 1}'`
 
 # 5. Create two-column data sets with latency classes and frequency values for each core, for example
 for i in `seq 1 $cores`
@@ -26,7 +26,7 @@ echo -n -e "set title \"Latency plot\"\n\
 set terminal png\n\
 set xlabel \"Latency (us), max $max us\"\n\
 set logscale y\n\
-set xrange [0:400]\n\
+set xrange [0:$max]\n\
 set yrange [0.8:*]\n\
 set ylabel \"Number of latency samples\"\n\
 set output \"plot.png\"
