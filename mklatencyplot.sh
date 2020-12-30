@@ -42,10 +42,13 @@ for i in "${CARGS[@]}"; do
 		next_one_is_real=true
 	fi
 done
-echo $time
 
 # 2. Get maximum latency
 max=`grep "Max Latencies" ${cyclictest_output} | tr " " "\n" | sort -n | tail -1 | sed s/^0*//`
+if [ -z $skip_below ]
+then
+	skip_below=0
+fi
 
 # 3. Grep data lines, remove empty lines and create a common field separator
 grep -v -e "^#" -e "^$" ${cyclictest_output} | tr " " "\t" >histogram 
@@ -61,7 +64,7 @@ do
 done
 
 # 6. Create plot command header
-echo -n -e "set title \"Latency plot $time\"\n\
+echo -n -e "set title \"Latency plot $time above $skip_below\"\n\
 set terminal png\n\
 set xlabel \"Latency (us), max $max us\"\n\
 set logscale y\n\
@@ -72,20 +75,32 @@ set output \"plot.png\"
 plot " >plotcmd
 
 # 7. Append plot command data references
+maxlats=$(grep "Max Latencies" data.dat | sed 's/# Max Latencies: //')
+IFS=" " read -ra maxlatarr <<< "$maxlats"
+
+unset is_not_first
 for i in `seq 1 $cores`
 do
-  if test $i != 1
-  then
-    echo -n ", " >>plotcmd
-  fi
   cpuno=`expr $i - 1`
-  if test $cpuno -lt 10
+  if [ "${maxlatarr[$i-1]}" -gt "$skip_below" ]
   then
-    title=" CPU$cpuno"
-   else
-    title="CPU$cpuno"
+	if [ ! -z $is_not_first ]
+	then
+		echo -n ", " >>plotcmd
+	else
+		is_not_first=true
+	fi
+
+	if test $cpuno -lt 10
+	then
+		title=" CPU$cpuno"
+	else
+		title="CPU$cpuno"
+	fi
+	echo -n "\"histogram$i\" using 1:2 title \"$title\" with histeps" >>plotcmd
+  else
+	  echo "Skipping CPU $cpuno, it's max latency is only ${maxlatarr[$i-1]}"
   fi
-  echo -n "\"histogram$i\" using 1:2 title \"$title\" with histeps" >>plotcmd
 done
 
 # 8. Execute plot command
