@@ -6,7 +6,7 @@ display_usage() {
     exit 1
 }
 
-if [ $# -le 1 ]
+if [ ! $# -eq 1 ]
 then
     display_usage
 fi
@@ -14,7 +14,9 @@ fi
 cyclictest_output=$1
 
 workdir=${workdir:-work}
+cp ${cyclictest_output} ${workdir}/data.dat
 pushd $workdir
+cyclictest_output=data.dat
 
 # 2. Get maximum latency
 max=`grep "Max Latencies" ${cyclictest_output} | tr " " "\n" | sort -n | tail -1 | sed s/^0*//`
