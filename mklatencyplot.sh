@@ -1,5 +1,16 @@
 #!/bin/bash
 
+display_usage() {
+    echo "Usage: "
+    echo "$0 <cyclictest output filename>"
+    exit 1
+}
+
+if [ $# -le 1 ]
+then
+    display_usage
+fi
+
 cyclictest_output=$1
 
 workdir=${workdir:-work}
