@@ -26,6 +26,24 @@ cp ${cyclictest_output} ${workdir}/data.dat
 pushd $workdir > /dev/null
 cyclictest_output=data.dat
 
+# 1. Get cyclictest time parameter
+cyclictest=$(cat ${cyclictest_output} | grep cyclictest | head -1)
+
+unset next_one_is_real
+IFS=" " read -ra CARGS <<< "$cyclictest"
+for i in "${CARGS[@]}"; do
+	if [ ! -z $next_one_is_real ]
+	then
+		time=$i
+		break
+	fi
+	if [ $i = "-D" ]
+	then
+		next_one_is_real=true
+	fi
+done
+echo $time
+
 # 2. Get maximum latency
 max=`grep "Max Latencies" ${cyclictest_output} | tr " " "\n" | sort -n | tail -1 | sed s/^0*//`
 
@@ -43,7 +61,7 @@ do
 done
 
 # 6. Create plot command header
-echo -n -e "set title \"Latency plot\"\n\
+echo -n -e "set title \"Latency plot $time\"\n\
 set terminal png\n\
 set xlabel \"Latency (us), max $max us\"\n\
 set logscale y\n\
