@@ -13,7 +13,15 @@ fi
 
 cyclictest_output=$1
 
-workdir=${workdir:-work}
+if [ -z ${workdir+x} ]
+then
+    workdir=$(mktemp -d -t oslat-XXXXXX)
+elif [ ! -d ${workdir} ]
+then
+    echo "${workdir} does not exist"
+    exit 2
+fi
+
 cp ${cyclictest_output} ${workdir}/data.dat
 pushd $workdir > /dev/null
 cyclictest_output=data.dat
@@ -64,5 +72,6 @@ done
 
 # 8. Execute plot command
 gnuplot -persist <plotcmd
+echo "plot is ready at ${workdir}/plot.png"
 
 popd > /dev/null
