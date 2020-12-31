@@ -67,10 +67,11 @@ done
 echo -n -e "set title \"Latency plot $time above $skip_below\"\n\
 set terminal png\n\
 set xlabel \"Latency (us), max $max us\"\n\
-set logscale y\n\
-set xrange [0:$max]\n\
+set logscale y 10\n\
+set xrange [0:$(( $max + 2 ))]\n\
 set yrange [0.8:*]\n\
 set ylabel \"Number of latency samples\"\n\
+set format y \"10^{%L}\"\n\
 set output \"plot.png\"
 plot " >plotcmd
 
