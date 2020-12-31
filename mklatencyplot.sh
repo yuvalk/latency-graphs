@@ -29,6 +29,7 @@ cyclictest_output=data.dat
 # 1. Get cyclictest time parameter
 cyclictest=$(cat ${cyclictest_output} | grep cyclictest | head -1)
 
+# get time parameter from cyclictest
 unset next_one_is_real
 IFS=" " read -ra CARGS <<< "$cyclictest"
 for i in "${CARGS[@]}"; do
@@ -42,6 +43,22 @@ for i in "${CARGS[@]}"; do
 		next_one_is_real=true
 	fi
 done
+
+# get cpus from cyclictest
+unset next_one_is_real
+IFS=" " read -ra CARGS <<< "$cyclictest"
+for i in "${CARGS[@]}"; do
+	if [ ! -z $next_one_is_real ]
+	then
+		cpusarg=$i
+		break
+	fi
+	if [ $i = "-a" ]
+	then
+		next_one_is_real=true
+	fi
+done
+IFS="," read -ra cpusarr <<< "$cpusarg"
 
 # 2. Get maximum latency
 max=`grep "Max Latencies" ${cyclictest_output} | tr " " "\n" | sort -n | tail -1 | sed s/^0*//`
@@ -92,11 +109,12 @@ do
 		is_not_first=true
 	fi
 
-	if test $cpuno -lt 10
+	cputitle=${cpusarr[$cpuno]}
+	if test $cputitle -lt 10
 	then
-		title=" CPU$cpuno"
+		title=" CPU$cputitle"
 	else
-		title="CPU$cpuno"
+		title="CPU$cputitle"
 	fi
 	echo -n "\"histogram$i\" using 1:2 title \"$title\" with histeps" >>plotcmd
   else
