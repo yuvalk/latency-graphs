@@ -13,7 +13,6 @@ fi
 
 cyclictest_output=$1
 png_filename="${2:-plot.png}"
-echo output to: $png_filename
 
 if [ -z ${workdir+x} ]
 then
@@ -76,6 +75,12 @@ grep -v -e "^#" -e "^$" ${cyclictest_output} | tr " " "\t" >histogram
 # 4. Set the number of cores, for example
 cores=`tail -1 histogram | awk '{print NF - 1}'`
 
+if [ ${cores} -ne ${#cpusarr[*]} ]
+then
+	echo -e "\e[41mWARNING: cyclictest cpu set and number of histogram mismatch\e[0m"
+fi
+
+
 # 5. Create two-column data sets with latency classes and frequency values for each core, for example
 for i in `seq 1 $cores`
 do
@@ -128,4 +133,5 @@ done
 # 8. Execute plot command
 popd > /dev/null
 gnuplot -persist < ${workdir}/plotcmd
+echo output to: $png_filename
 rm -fr ${workdir}
