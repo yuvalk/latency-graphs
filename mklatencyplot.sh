@@ -12,6 +12,7 @@ then
 fi
 
 cyclictest_output=$1
+data_filename=$(basename $1)
 png_filename="${2:-plot.png}"
 
 if [ -z ${workdir+x} ]
@@ -89,7 +90,7 @@ do
 done
 
 # 6. Create plot command header
-echo -n -e "set title \"Latency plot $time above $skip_below\"\n\
+echo -n -e "set title \"$time Cyclictest latencies for $data_filename\"\n\
 set terminal png\n\
 set xlabel \"Latency (us), max $max us\"\n\
 set logscale y 10\n\
