@@ -2,16 +2,18 @@
 
 display_usage() {
     echo "Usage: "
-    echo "$0 <cyclictest output filename>"
+    echo "$0 <cyclictest output filename> [output file]"
     exit 1
 }
 
-if [ ! $# -eq 1 ]
+if [ $# -lt 1 ]
 then
     display_usage
 fi
 
 cyclictest_output=$1
+png_filename="${2:-plot.png}"
+echo output to: $png_filename
 
 if [ -z ${workdir+x} ]
 then
@@ -66,6 +68,7 @@ if [ -z $skip_below ]
 then
 	skip_below=0
 fi
+echo skip below $skip_below
 
 # 3. Grep data lines, remove empty lines and create a common field separator
 grep -v -e "^#" -e "^$" ${cyclictest_output} | tr " " "\t" >histogram 
@@ -89,7 +92,7 @@ set xrange [0:$(( $max + 2 ))]\n\
 set yrange [0.8:*]\n\
 set ylabel \"Number of latency samples\"\n\
 set format y \"10^{%L}\"\n\
-set output \"plot.png\"
+set output \"${png_filename}\"
 plot " >plotcmd
 
 # 7. Append plot command data references
@@ -116,14 +119,13 @@ do
 	else
 		title="CPU$cputitle"
 	fi
-	echo -n "\"histogram$i\" using 1:2 title \"$title\" with histeps" >>plotcmd
+	echo -n "\"${workdir}/histogram$i\" using 1:2 title \"$title\" with histeps" >>plotcmd
   else
 	  echo "Skipping CPU $cpuno, it's max latency is only ${maxlatarr[$i-1]}"
   fi
 done
 
 # 8. Execute plot command
-gnuplot -persist <plotcmd
-echo "plot is ready at ${workdir}/plot.png"
-
 popd > /dev/null
+gnuplot -persist < ${workdir}/plotcmd
+rm -fr ${workdir}
